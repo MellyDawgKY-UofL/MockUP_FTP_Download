@@ -17,7 +17,7 @@ jobs:
     name: Deploy Artifact
     runs-on: windows-latest
     env:
-      FTP_SERVER: "ftp://gandydrop.couchdrop.io/"
+      FTP_SERVER: "gandydrop.couchdrop.io/"
       FTP_SOURCE_FOLDER: "NCRMS/AWSCloudPOC/"
       FILE_NAME: "IMG_1866.jpeg"
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
