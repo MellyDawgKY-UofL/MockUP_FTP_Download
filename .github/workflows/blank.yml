@@ -1,0 +1,76 @@
+name: Get-NIAID-CRMS-AWS-POC-DockerImage
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Choose the deployment environment"
+        required: true
+        default: "Dev"
+        options:
+          - Dev
+          - QA
+          - Prod
+
+jobs:
+  deploy:
+    name: Deploy Artifact
+    runs-on: windows-latest
+    env:
+      FTP_SERVER: "EnterUrlHere"
+      FTP_SOURCE_FOLDER: "NCRMS/AWSCloudPOC/"
+      FILE_NAME: "niaid-crms-vrc-csm.tar"
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set temporary paths
+        run: |
+          echo "TEMP_PATH=${{ runner.temp }}/niaid-crms-vrc-csm.tar" >> $GITHUB_ENV
+          echo "UNZIP_PATH=${{ runner.temp }}/niaid-crms-vrc-csm" >> $GITHUB_ENV
+
+      - name: Run PowerShell Script for Dev Environment
+        if: ${{ inputs.environment == 'Dev' }}
+        run: |
+          pwsh -Command "
+          \$ftpServer = '${{ env.FTP_SERVER }}'
+          \$ftpSourceFolder = '${{ env.FTP_SOURCE_FOLDER }}'
+          \$fileName = '${{ env.FILE_NAME }}'
+          \$ftpDownloadPath = '${{ env.TEMP_PATH }}'
+          \$artifactDestination = '${{ env.UNZIP_PATH }}'
+          \$credentials = New-Object System.Net.NetworkCredential('${{ env.FTP_USERNAME }}', '${{ env.FTP_PASSWORD }}')
+
+          \$artifactSourcepath = \$ftpServer + \$ftpSourceFolder + \$fileName
+
+          try {
+              \$webclient = New-Object System.Net.WebClient
+              \$webclient.Credentials = \$credentials
+              Write-Host 'Attempting to download Artifact: Source: ' \$artifactSourcepath ' Dest: ' \$ftpDownloadPath
+              \$webclient.DownloadFile(\$artifactSourcepath, \$ftpDownloadPath)
+
+              \$extn = [System.IO.Path]::GetExtension(\$fileName)
+              if (\$extn -eq '.zip') {
+                  Write-Host 'Unzipping Artifact. Dest: ' \$artifactDestination
+                  Expand-Archive \$ftpDownloadPath -DestinationPath \$artifactDestination
+              }
+          } catch {
+              Write-Host 'Error: FTP file does not exist or could not be downloaded: ' \$artifactSourcepath
+          }
+          "
+
+      - name: Run PowerShell Script for QA Environment
+        if: ${{ inputs.environment == 'QA' }}
+        run: |
+          pwsh -Command "
+          Write-Host 'QA environment script execution will be implemented here.'
+          "
+
+      - name: Run PowerShell Script for Prod Environment
+        if: ${{ inputs.environment == 'Prod' }}
+        run: |
+          pwsh -Command "
+          Write-Host 'Prod environment script execution will be implemented here.'
+          "
