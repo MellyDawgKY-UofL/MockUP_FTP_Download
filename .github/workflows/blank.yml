@@ -19,7 +19,7 @@ jobs:
     env:
       FTP_SERVER: "ftp://gandydrop.couchdrop.io/"
       FTP_SOURCE_FOLDER: "NCRMS/AWSCloudPOC/"
-      FILE_NAME: "niaid-crms-vrc-csm.tar"
+      FILE_NAME: "IMG_1866.jpeg"
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
